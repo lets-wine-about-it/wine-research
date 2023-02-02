@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+seed =42
 
 def wine_data():
     # pulling data from csv
@@ -26,9 +27,6 @@ def wine_data():
 
     wines.rename(columns = name_dict,
              inplace = True)
-
-    wines['free_sulfur_dioxide'] = wines.free_sulfur_dioxide.astype(int)
-
-    wines['total_sulfur_dioxide'] = wines.total_sulfur_dioxide.astype(int)
+    
     
     return wines
