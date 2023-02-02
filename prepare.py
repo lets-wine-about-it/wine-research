@@ -49,10 +49,22 @@ def split_data(df,strat):
                                        test_size=.3, 
                                        random_state=42,stratify= train_validate[strat] )
     
-    print(train.shape , validate.shape, test.shape)
+#     print(train.shape , validate.shape, test.shape)
 
           
     return train, validate, test
+
+
+def train_val_test(df, strat):
+    df = get_bins(df)
+    
+    df= get_dummies(df)
+    
+    train, validate, test = split_data(df,strat)
+    
+    return train, validate, test
+    
+    
 
 
 def x_and_y(train,validate,test,target):
