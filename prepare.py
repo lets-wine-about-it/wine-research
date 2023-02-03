@@ -49,10 +49,22 @@ def split_data(df,strat):
                                        test_size=.3, 
                                        random_state=42,stratify= train_validate[strat] )
     
-    print(train.shape , validate.shape, test.shape)
+#     print(train.shape , validate.shape, test.shape)
 
           
     return train, validate, test
+
+
+def train_val_test(df, strat):
+    df = get_bins(df)
+    
+    df= get_dummies(df)
+    
+    train, validate, test = split_data(df,strat)
+    
+    return train, validate, test
+    
+    
 
 
 def x_and_y(train,validate,test,target):
@@ -73,34 +85,38 @@ def x_and_y(train,validate,test,target):
     return x_train, y_train, x_validate, y_validate, x_test, y_test
 
 
-def scaled_data(x_train,x_validate,x_test,num_cols,return_scaler = False):
-
-    ''' a function to scale my data appropriately ''' 
+def scale_data(train, validate, test, 
+               columns_to_scale=[],
+               return_scaler=False):
+    ''' 
+    Takes in train, validate, and test data and returns their scaled counterparts.
+    If return_scalar is True, the scaler object will be returned as well
+    '''
+    # make copies of our original data so we dont gronk up anything
+    train_scaled = train.copy()
+    validate_scaled = validate.copy()
+    test_scaled = test.copy()
     
-    # intializing scaler
+    # use sacaler
     scaler = MinMaxScaler()
     
     # fit scaler
-    scaler.fit(x_train[num_cols])
+    scaler.fit(train[columns_to_scale])
     
-    # creating new scaled dataframes
-    x_train_s = scaler.transform(x_train[num_cols])
-    x_validate_s = scaler.transform(x_validate[num_cols])
-    x_test_s = scaler.transform(x_test[num_cols])
-
-    # making a copy bof train to hold scaled version
-    x_train_scaled = x_train.copy()
-    x_validate_scaled = x_validate.copy()
-    x_test_scaled = x_test.copy()
-
-    x_train_scaled[num_cols] = x_train_s
-    x_validate_scaled[num_cols] = x_validate_s
-    x_test_scaled[num_cols] = x_test_s
-
+    # apply the scaler
+    train_scaled[columns_to_scale] = pd.DataFrame(scaler.transform(train[columns_to_scale]),
+                                                  columns=train[columns_to_scale].columns.values).set_index([train.index.values])
+                                                  
+    validate_scaled[columns_to_scale] = pd.DataFrame(scaler.transform(validate[columns_to_scale]),
+                                                  columns=validate[columns_to_scale].columns.values).set_index([validate.index.values])
+    
+    test_scaled[columns_to_scale] = pd.DataFrame(scaler.transform(test[columns_to_scale]),
+                                                 columns=test[columns_to_scale].columns.values).set_index([test.index.values])
+    
     if return_scaler:
-        return scaler, x_train_scaled, x_validate_scaled, x_test_scaled
+        return scaler, train_scaled, validate_scaled, test_scaled
     else:
-        return x_train_scaled, x_validate_scaled, x_test_scaled
+        return train_scaled, validate_scaled, test_scaled
     
 
 
