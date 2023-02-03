@@ -30,11 +30,11 @@ def get_bins(df):
     
     
 
-def get_dummies(df, columns=None, drop_first=True):
+def get_dummies(df,drop_first=True):
     
-    dummies = pd.get_dummies(df, columns=columns, drop_first=drop_first)
+    encoded = pd.get_dummies(df, drop_first=drop_first)
     
-    return dummies
+    return encoded
 
 
 def split_data(df,strat):
