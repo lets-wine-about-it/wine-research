@@ -37,13 +37,19 @@ def vis_get_elbow(df, x_value, y_value):
 def vis_make_cluster(df, x_value, y_value, n, seed = 42):
     '''takes a dataframe, number of cluster and return a list of clusters'''
     
-    df= df[[x_value, y_value]]
+    cluster_name = x_value +'_' + y_value +'_cluster'
+    
+    df_1= df.copy()[[x_value, y_value]]
+    
     
     Kmeans = KMeans(n_clusters=n, random_state=42)
 
-    Kmeans.fit(df)
+    Kmeans.fit(df_1)
     
-    df['clusters']=  Kmeans.predict(df)
+    df_1['clusters']=  Kmeans.predict(df_1)
+    df[cluster_name] = df_1['clusters']
     
-    sns.relplot(data=df, x=df[x_value], y=df[y_value], hue='clusters')
+    sns.relplot(data=df_1, x=df_1[x_value], y=df_1[y_value], hue='clusters')
     plt.show()
+    return df
+    
