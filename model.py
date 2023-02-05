@@ -1,10 +1,11 @@
 import pandas as pd  
 import numpy as np
+
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import matplotlib.ticker as mtick
 import seaborn as sns
 
-import acquire as ac
 import prepare as pr
 import explore as ex
 
@@ -20,6 +21,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 
+
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 
 from sklearn.metrics import accuracy_score
@@ -28,8 +30,8 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler, Qu
 
 import warnings
 warnings.filterwarnings('ignore')
-seed = 42
 
+seed = 42
 a = .05
 
 def get_baseline_accuracy(x_trains, y_train):
@@ -49,9 +51,9 @@ def get_baseline_accuracy(x_trains, y_train):
 
 
     
-def decision_tree_loop(x_trains, x_validates, y_train, y_validate):
+def decision_tree(x_trains, x_validates, y_train, y_validate):
     
-    ''' This method pulls in a x_train, x_validate, y_train, y_validate dataframes and returns a dataframe which holds the train accuracy score, validate score and the accuracy difference ''' 
+    '''takes in x_train, x_validate, y_train, y_validate dataframes and returns a dataframe with accuracy score on train and validate data and the accuracy difference ''' 
     
     # create an empty list to append output
     metrics = []
@@ -68,19 +70,28 @@ def decision_tree_loop(x_trains, x_validates, y_train, y_validate):
 
         # accuracy score on validate
         accuracy_validate = clf.score(x_validates,y_validate)
-
+        
+        
         output = {'max_depth': i,
                  'train_accuracy': accuracy_train,
                  'validate_accuracy': accuracy_validate,
                  }
+        
         metrics.append(output)
-    
+       
+    # create a dataframe
     df = pd.DataFrame(metrics)
+    
+    # create a new column for a dataframe with a differance of train accuracy score and validate accuracy score
     df['difference'] = df.train_accuracy - df.validate_accuracy
+    
     return df
 
-def random_forest_tree_loop(x_trains, x_validates, y_train, y_validate):
-    
+
+def random_forest_tree(x_trains, x_validates, y_train, y_validate):
+    '''takes in x_train, x_validate, y_train, y_validate dataframes
+     and returns a dataframe with accuracy score on train and validate data and the accuracy difference ''' 
+        
     # create an empty list to append output
     metrics = []
     
@@ -102,14 +113,21 @@ def random_forest_tree_loop(x_trains, x_validates, y_train, y_validate):
                  'train_accuracy': accuracy_train,
                  'validate_accuracy': accuracy_validate,
                  }
+        
         metrics.append(output)
     
+    # create a dataframe
     df = pd.DataFrame(metrics)
+        
+    # create a new column for a dataframe with a differance of train accuracy score and validate accuracy score
     df['difference'] = df.train_accuracy - df.validate_accuracy
+    
     return df
 
 
-def knn_loop(x_trains, x_validates, y_train, y_validate):
+def knn(x_trains, x_validates, y_train, y_validate):
+    '''takes in x_train, x_validate, y_train, y_validate dataframes
+    and returns a dataframe with accuracy score on train and validate dataand the accuracy difference ''' 
     
     # create an empty list to append output
     metrics = []
@@ -132,12 +150,55 @@ def knn_loop(x_trains, x_validates, y_train, y_validate):
                  'train_accuracy': accuracy_train,
                  'validate_accuracy': accuracy_validate,
                  }
+        
+        metrics.append(output)
+        
+    # create a dataframe
+    df = pd.DataFrame(metrics)
+    
+    # create a new column for a dataframe with a differance of train accuracy score and validate accuracy score
+    df['difference'] = df.train_accuracy - df.validate_accuracy
+    
+    return df
+
+
+def logistic_regression(x_trains, x_validates, y_train, y_validate):
+    # using Logistic regression model with different values of hyperparameter c to find best model
+
+    # create an empty list to append output
+    metrics = []
+
+    # create model1 of logistic regression
+    logit1 = LogisticRegression(C = 1, random_state=seed, solver='liblinear')
+    logit2 = LogisticRegression(C = 0.1, random_state=seed, solver='liblinear')
+
+    cols = [logit1, logit2]
+
+    for col in cols : 
+
+        # fit model
+        col.fit(x_trains, y_train)
+
+        # fit the model to training data
+        col.fit(x_trains, y_train)
+
+        # accuracy score on train
+        accuracy_train = col.score(x_trains,y_train)
+
+        # accuracy score on validate
+        accuracy_validate =col.score(x_validates,y_validate)
+
+        output = {'model': col,
+                 'train_accuracy': accuracy_train,
+                 'validate_accuracy': accuracy_validate,
+                 }
         metrics.append(output)
     
     df = pd.DataFrame(metrics)
+    
     df['difference'] = df.train_accuracy - df.validate_accuracy
+    
     return df
-
 
 def get_decision_tree(x_trains, x_validates, y_train, y_validate, n):
     '''get decision tree accuracy score on train and validate data'''
@@ -151,13 +212,7 @@ def get_decision_tree(x_trains, x_validates, y_train, y_validate, n):
     # compute accuracy
     train_acc = clf.score(x_trains, y_train)
     validate_acc = clf.score(x_validates, y_validate)
-    
-    # print accuracy score on train
-#     print(f'Decision Tree Accuracy score on train set: {train_acc}')
-    
-    # print accuracy score on validate
-#     print(f'Decsion Tee Accuracy score on validate set: {validate_acc}')
-    
+
     return train_acc, validate_acc
 
 
@@ -173,12 +228,7 @@ def get_random_forest(x_trains, x_validates, y_train, y_validate, n):
     # compute accuracy
     train_acc = rf.score(x_trains, y_train)
     validate_acc = rf.score(x_validates, y_validate)
-    
-    # print accuracy score on train
-#     print(f'Random Forest Accuracy score on train set: {train_acc}')
-    
-    # print accuracy score on validate
-#     print(f'Random Forest score on validate set: {validate_acc}')
+
     return train_acc, validate_acc
 
 
@@ -195,78 +245,105 @@ def get_knn(x_trains, x_validates, y_train, y_validate, n):
     train_acc = knn.score(x_trains, y_train)
     validate_acc = knn.score(x_validates, y_validate)
     
-    # print accuracy score on train
-#     print(f'KNN Accuracy score on train set: {train_acc}')
+    return train_acc, validate_acc
+
+def get_logistic_regrssion(x_trains, x_validates, y_train, y_validate, n):
+    '''get logistic regrssion accuracy score on train and validate data'''
     
-    # print accuracy score on validate
-#     print(f'KNN Accuracy score on validate set: {validate_acc}')
+    # create model
+    logit = LogisticRegression(C = n, random_state=seed, solver='liblinear')
+
+    # fit the model to train data
+    logit.fit(x_trains, y_train)
+
+    # compute accuracy
+    train_acc = logit.score(x_trains, y_train)
+    validate_acc = logit.score(x_validates, y_validate)
     
     return train_acc, validate_acc
+                           
+ 
     
 def get_models_accuracy(x_trains, y_train, x_validates, y_validate, train, validate):
-    '''takesx_trains, y_train, x_validates, y_validate, train, validate, target
-    return dataframe with models and their RMSE values on train and validate data
+    '''takes x_trains, y_train, x_validates, y_validate, train, validate, target
+    return dataframe with models and their accuracy score on train and validate data
     '''
     # get accuracy
 #     baseline_accuracy = mo.get_baseline_accuracy(x_trains, y_train)
-    tree_train_acc, tree_validate_acc= get_decision_tree(x_trains, x_validates, y_train, y_validate, 2)
-    random_train_acc, random_validate_acc= get_random_forest(x_trains, x_validates, y_train, y_validate, 22)
-    knn_train_acc, knn_validate_acc= get_knn(x_trains, x_validates, y_train, y_validate, 19)
+    tree_train_acc, tree_validate_acc= get_decision_tree(x_trains, x_validates, y_train, y_validate, 7)
+    random_train_acc, random_validate_acc= get_random_forest(x_trains, x_validates, y_train, y_validate, 19)
+    knn_train_acc, knn_validate_acc= get_knn(x_trains, x_validates, y_train, y_validate, 13)
+    logistic_train_acc, logistic_validate_acc = get_logistic_regrssion(x_trains, x_validates, y_train, y_validate, 1)
     
     # assing index
-    index = ['Decision_Tree(max_depth=2)', 'Random_Forest(min_samples_lead=22)', 'KNN (Neighours=19)']
+    index = ['Decision_Tree(max_depth=7)', 'Random_Forest(min_samples_lead=19)', 'KNN (Neighours=13)', 'Logistic_Regression(C=1)']
     
     # create a dataframe
-    df = pd.DataFrame({'train_accuracy':[tree_train_acc, random_train_acc, knn_train_acc],
-                         'validate_accuracy': [tree_validate_acc, random_validate_acc, knn_validate_acc]},index=index)
+    df = pd.DataFrame({'train_accuracy':[tree_train_acc, random_train_acc, knn_train_acc, logistic_train_acc],
+                       'validate_accuracy': [tree_validate_acc, random_validate_acc, knn_validate_acc,                                                     logistic_validate_acc]},index=index)
     df['difference']= df['train_accuracy']-df['validate_accuracy']
     
     return df
 
 
-def get_decison_tree_test(x_train, x_test, y_train, y_test,n):
-   
-
-        clf = DecisionTreeClassifier(max_depth=n, random_state=42)
-        clf.fit(x_train, y_train)
+def viz_models_accuracy(df):
+    '''takes in a dataframe and plot a graph to show comparisons models accuracy score on train and valiadate data'''
+    df.train_accuracy = df.train_accuracy * 100
+    df.validate_accuracy = df.validate_accuracy * 100
+#     plt.figure(figsize=(3,6))
+    ax = df.drop(columns='difference').plot.bar(rot=75)
+    ax.spines[['right', 'top']].set_visible(False)
+    plt.title("Comparisons of Accuracy")
+    plt.ylabel('Accuracy score')
+#     ax.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1, decimals=None, symbol='%', is_latex=False))
+    plt.bar_label(ax.containers[0],fmt='%.0f%%')
+    plt.bar_label(ax.containers[1],fmt='%.0f%%')
     
-       
-        validate_acc = clf.score(x_test, y_test)
+
+    plt.show()
+
+
+# def get_decison_tree_test(x_train, x_test, y_train, y_test,n):
+#     ''' get decision tree accuracy score on test'''
+   
+#     clf = DecisionTreeClassifier(max_depth=n, random_state=42)
+    
+#     clf.fit(x_train, y_train)
+    
+#     validate_acc = clf.score(x_test, y_test)
         
-        
-        print(validate_acc)
+#     print(validate_acc)
         
         
 def get_random_forest_test(x_train, x_test, y_train, y_test,n):
-   
+    ''' get random forest tree accuracy score on test'''
 
-        rf= RandomForestClassifier(min_samples_leaf = n, random_state=42) 
-        rf.fit(x_train, y_train)
-    
-       
-        validate_acc = rf.score(x_test, y_test)
-        
-        
-        print(validate_acc)
-     
-        
-def pearson_test(df, feat1,feat2):
-    
-    # running the test
-    r, p = stats.pearsonr(df[feat1], df[feat2])
-    
-    print(f'p is {p:.10f}, {r}') 
-   
+    rf= RandomForestClassifier(min_samples_leaf = n, random_state=42) 
 
-    if p < .05:
-        print('The pearson r test shows that there is a signficant relationship.')
-    else: 
-        print('The relationship is not significant')
-        
+    rf.fit(x_train, y_train)
+
+    validate_acc = rf.score(x_test, y_test)
+
+    print(validate_acc)
+
+    
+def get_logistic_regression_test(x_train, x_test, y_train, y_test,n):
+    ''' get random forest tree accuracy score on test'''
+
+    logit1 = LogisticRegression(C = n, random_state=seed, solver='liblinear' )
+
+    logit1.fit(x_train, y_train)
+
+    validate_acc = logit1.score(x_test, y_test)
+
+    print(validate_acc)
+    
+
         
 def get_heatmap(df):
+    '''takes in datafreame and plot heat map to show correlation'''
     
-    # creates a correlation matrix
+    # create a correlation matrix
     wine_heat = df.corr()
     
     # create a heatmap
@@ -274,94 +351,134 @@ def get_heatmap(df):
     
 def alc_t_test(train):
     
-    # creating the average alcohol rating
+    # create the average alcohol rating
     alc_mean = train['alcohol'].mean() 
     
-    # creating subsets based on the average
+    # create subsets based on the average
     above_alc = train[train['alcohol'] > alc_mean].quality
     below_alc = train[train['alcohol'] < alc_mean].quality
     
-    # creating a ttest
+    # create a ttest
     t, p = stats.ttest_ind(above_alc, below_alc, equal_var=False)
 
     print(f'p = {p}, t = {t}')
     
     print("Reject $H_{0}$? ", p < a)
     
+
 def den_t_test(train):
     
-    # creating the density average
+    # create the density average
     den_mean = train['density'].mean()
     
-    # creating subsets bases on the average
+    # create subsets bases on the average
     above_den = train[train['density'] > den_mean].quality
     below_den = train[train['density'] < den_mean].quality
     
-    # creating a t test
+    # create a t test
     t, p = stats.ttest_ind(above_den, below_den, equal_var=False)
     
     print(f'p = {p}, t = {t}')
     
     print("Reject $H_{0}$? ", p < a)
     
+    
 def vol_t_test(train):
     
-    # creating the density average
+    # create the density average
     vol_mean = train['volatile_acidity'].mean()
     
-    # creating subsets bases on the average
+    # create subsets bases on the average
     above_vol = train[train['volatile_acidity'] > vol_mean].quality
     below_vol = train[train['volatile_acidity'] < vol_mean].quality
     
-    # creating a t test
+    # create a t test
     t, p = stats.ttest_ind(above_vol, below_vol, equal_var=False)
     
     print(f'p = {p}, t = {t}')
     
     print("Reject $H_{0}$? ", p < a)
     
-def alc_den_clusters(x_trains,x_validates,x_tests):
+def alc_den_clusters(x_trains,x_validates,x_tests, train):
     
-    # creating the features to cluster on
+    # create the features to cluster on
     talc = x_trains[['alcohol','density']]
     valc = x_validates[['alcohol','density']]
     tealc = x_tests[['alcohol','density']]
     
-    # adding the clusters to the original datasets
+    # add the clusters to the original datasets
     x_trains['alc_den'],x_validates['alc_den'],x_tests['alc_den'] = ex.cluster_data(talc,valc,tealc,3,cluster_col_name= 'alc_den')
     
-    # plotting the train clusters
-    sns.scatterplot(data = x_trains, x = 'alcohol', y = 'density', hue = 'alc_den')
+    plt.figure(figsize = (15,5))
     
+    plt.subplot(121)
+    ax = sns.scatterplot(data = x_trains, x = 'alcohol', y = 'density', hue = 'alc_den')
+    plt.title('Relations of alcohol with density using clusters')
+    ax.spines[['right', 'top']].set_visible(False)
+    
+    plt.subplot(122)
+    ax = sns.scatterplot(data = train, x = 'alcohol', y = 'density', hue ='quality_bin')
+    plt.title('Relations of alcohol with density without clusters')
+    ax.spines[['right', 'top']].set_visible(False)
+    
+    plt.suptitle('Comparison of data with clusters and without clusters', fontsize=14)
+    plt.show()
+
     return x_trains, x_validates, x_tests
 
 
-def den_res_clusters(x_trains,x_validates,x_tests):
+def den_res_clusters(x_trains,x_validates,x_tests,train):
     
-    # creating the features to cluster on
+    # create the features to cluster on
     tres = x_trains[['residual_sugar','density']]
     vres = x_validates[['residual_sugar','density']]
     teres = x_tests[['residual_sugar','density']] 
     
-    # adding the clusters to the original datasets
+    # add the clusters to the original datasets
     x_trains['res_den'],x_validates['res_den'],x_tests['res_den'] = ex.cluster_data(tres,vres,teres,4,cluster_col_name= 'res_den')
     
-    # plotting the train clusters
-    sns.scatterplot(data = x_trains, x = 'residual_sugar', y = 'density', hue = 'alc_den')    
+    plt.figure(figsize = (15,5))
+    
+    plt.subplot(121)
+    ax = sns.scatterplot(data = x_trains, x = 'residual_sugar', y = 'density', hue = 'res_den')
+    plt.title('Relations of residual sugar with density using clusters')
+    ax.spines[['right', 'top']].set_visible(False)
+    
+    plt.subplot(122)
+    ax = sns.scatterplot(data = train, x = 'residual_sugar', y = 'density', hue = 'quality_bin')
+    plt.title('Relations of residual sugar with density without clusters')
+    ax.spines[['right', 'top']].set_visible(False)
+    
+    plt.suptitle('Comparison of data with clusters and without clusters', fontsize=14)
+    plt.show()
+    
     return x_trains, x_validates, x_tests
 
-def alc_vol_clusters(x_trains,x_validates,x_tests):
+def alc_vol_clusters(x_trains,x_validates,x_tests,train):
     
-    # creating the features to cluster on
+    # create the features to cluster on
     tavol = x_trains[['alcohol','volatile_acidity']]
     vavol = x_validates[['alcohol','volatile_acidity']]
     teavol = x_tests[['alcohol','volatile_acidity']] 
     
-    # adding the clusters to the original datasets
+    # add the clusters to the original datasets
     x_trains['alc_vol'],x_validates['alc_vol'],x_tests['alc_vol'] = ex.cluster_data(tavol,vavol,teavol,4,cluster_col_name= 'alc_vol')
     
-    # plotting the train clusters
-    sns.scatterplot(data = x_trains, x = 'alcohol', y = 'volatile_acidity', hue = 'alc_den')    
+    plt.figure(figsize = (15,5))
+    
+    plt.subplot(121)
+    ax = sns.scatterplot(data = x_trains, x = 'alcohol', y = 'volatile_acidity', hue = 'alc_vol')
+    plt.title('Relations of alcohol with volatile acidity using clusters')
+    ax.spines[['right', 'top']].set_visible(False)
+    
+    plt.subplot(122)
+    ax = sns.scatterplot(data = train, x = 'alcohol', y = 'volatile_acidity', hue = 'quality_bin')
+    plt.title('Relations of alcohol with volatile acidity without clusters')
+    ax.spines[['right', 'top']].set_visible(False)
+    
+    plt.suptitle('Comparison of data with clusters and without clusters', fontsize=14)
+    plt.show()
+    
     return x_trains, x_validates, x_tests
 
 
