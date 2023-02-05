@@ -13,9 +13,9 @@ The goal of the project is to analyze the data, find driving features of wine qu
 # Initial Questions
 * What is the relationship between alcohol and quality?
 * Does density play role in determining quality of wine?
-* Is the relationship between volatile_acidity and quality significant?
 * What role does chlorides and density play on quality of wine?
-* 
+* Is the relationship between volatile_acidity and quality significant?
+
 
 # The Plan
 
@@ -33,11 +33,9 @@ The goal of the project is to analyze the data, find driving features of wine qu
     * Use graph and hypothesis testing to find churn, driving factors of churn, and answer the following initial questions
         * What is the relationship between alcohol and quality?
         * Does density play role in determining quality of wine?
-        * Is the relationship between volatile_acidity and quality significant?
         * What role does chlorides and density play on quality of wine?
-        * 
-        * 
-
+        * Is the relationship between volatile_acidity and quality significant?
+       
 * Develop Model
     * Use driving attributes to create labels
     * Set up baseline prediction
@@ -68,11 +66,13 @@ The goal of the project is to analyze the data, find driving features of wine qu
 3. Run notebook
 
 # Takeaways and Conclusions
-* 
-* 
-* 
+    
+* Alcohol, chlorides, volatile acidity and density has high correlation with quality
+* Alochol has positive correlation with quality, but chlorides, volatile acidity and density have negative correlation with quality
+* All models perfomed better than baseline on train and validat data.
+* Random forest tree model has the accuracy score of about 58% on test data and beat the baseline accuracy by about 14%.
+* We feel comfortable saying Random forest tree is fit for production, until we are able to out perform it with a different model.
 
 # Recommendations
-* 
-* 
-* 
+* We recommend to target wines the have an above average alcohol content(around 10.5 +), as well as, keeping `density` and `volatile_acidity` low
+ 
