@@ -123,10 +123,11 @@ def scale_data(train, validate, test, columns_to_scale=[], return_scaler=False):
     takes in train, validate, and test data and returns their scaled counterparts.
     If return_scalar is True, the scaler object will be returned as well
     '''
-    # make copies of our original data so we dont gronk up anything
-    train_scaled = train.copy()
-    validate_scaled = validate.copy()
-    test_scaled = test.copy()
+    
+    # make copies of our original data 
+    train_scaled = train.drop(columns='quality_bin').copy()
+    validate_scaled = validate.drop(columns='quality_bin').copy()
+    test_scaled = test.drop(columns='quality_bin').copy()
     
     # use sacaler
     scaler = MinMaxScaler()
