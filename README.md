@@ -30,7 +30,7 @@ The goal of the project is to analyze the data, find driving features of wine qu
       * split data into train, validate and test (approximatley 56/24/20)
 
 * Explore Data
-    * Use graph and hypothesis testing to find churn, driving factors of churn, and answer the following initial questions
+    * Use graph and hypothesis testing to answer the following initial questions
         * What is the relationship between alcohol and quality?
         * Does density play role in determining quality of wine?
         * What role does chlorides and density play on quality of wine?
